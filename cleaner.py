@@ -75,21 +75,31 @@ for key, poke_type in GELATO.iteritems():
     if ARGS.transfer:
         evolvable = INV.candies[key] / pokedex.evolves[key]
         transferable = num_poke - evolvable
-        check = raw_input(
-            'Are you sure to want to transfer {}/{} of these {}: '.format(
-                transferable, num_poke, pokedex[key]))
-        if check.upper() == 'Y':
-            for poke in poke_type:
-                if transferable > 0:
-                    print '\tNew gelato flavour: {}'.format(poke.cp)
-                    if ARGS.live:
-                        SESSION.releasePokemon(poke)
-                    transferable -= 1
+        if transferable > 0:
+            check = raw_input(
+                'Are you sure to want to transfer {}/{} of these {}: '.format(
+                    transferable, num_poke, pokedex[key]))
+            if check.upper() == 'Y':
+                for poke in poke_type:
+                    if transferable > 0:
+                        goodness = (
+                            poke.individual_attack + poke.individual_defense +
+                            poke.individual_stamina) / 0.45
+                        print "Transfered  - CP {:>4} - {:2.1f}% ({:>2}/{:>2}/{:>2}) - Candies: {}/{}".format(
+                            poke.cp, goodness, poke.individual_attack,
+                            poke.individual_defense, poke.individual_stamina,
+                            INV.candies[poke.pokemon_id],
+                            pokedex.evolves[poke.pokemon_id])
+                        if ARGS.live:
+                            SESSION.releasePokemon(poke)
+                        transferable -= 1
+        else:
+            print 'Not enough to transfer, time to evolve?'
     if ARGS.evolve:
-
         NUM_EVOLVE += INV.candies[key] / pokedex.evolves[key]
 
-print 'Evolvable: {}'.format(NUM_EVOLVE)
+if ARGS.evolve:
+    print 'Evolvable: {}'.format(NUM_EVOLVE)
 
 # for flavour in GELATO:
 #     SESSION.releasePokemon(flavour)
